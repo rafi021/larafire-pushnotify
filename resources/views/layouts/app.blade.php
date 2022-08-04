@@ -76,5 +76,56 @@
             @yield('content')
         </main>
     </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.9.1/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyBpI2fnrNheZBjZ1Xz4Bql570D52p7WcCY",
+          authDomain: "larafire-pushnotify.firebaseapp.com",
+          projectId: "larafire-pushnotify",
+          storageBucket: "larafire-pushnotify.appspot.com",
+          messagingSenderId: "82800582080",
+          appId: "1:82800582080:web:f6f432301247be53a03c25",
+          measurementId: "G-80MGGG5K81"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        const messaging = firebase.messaging();
+
+        function initFirebaseMessagingRegistration() {
+            messaging.requestPermission().then(function () {
+                return messaging.getToken()
+            }).then(function(token) {
+
+                axios.post("{{ route('fcmToken') }}",{
+                    _method:"PATCH",
+                    token
+                }).then(({data})=>{
+                    console.log(data)
+                }).catch(({response:{data}})=>{
+                    console.error(data)
+                })
+
+            }).catch(function (err) {
+                console.log(`Token Error :: ${err}`);
+            });
+        }
+
+        initFirebaseMessagingRegistration();
+
+        messaging.onMessage(function({data:{body,title}}){
+            new Notification(title, {body});
+        });
+    </script>
 </body>
 </html>
